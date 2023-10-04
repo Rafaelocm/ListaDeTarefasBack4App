@@ -1,6 +1,7 @@
 import 'package:estudobackapp/model/tarefa_model.dart';
 import 'package:estudobackapp/repositories/tarefa_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class TarefasPage extends StatefulWidget {
   const TarefasPage({super.key});
@@ -15,6 +16,7 @@ class _TarefasPageState extends State<TarefasPage> {
   var _tarefas = TarefasBack4AppModel([]);
   var apenasNaoConcluidas = false;
   var load = false;
+  var quantidadeTarefasConcluidas = 0;
 
   @override
   void initState() {
@@ -39,9 +41,9 @@ class _TarefasPageState extends State<TarefasPage> {
         child: Scaffold(
       appBar: AppBar(
         title: const Text("Lista de Tarefas"),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        actions: [
+          InkWell(
+         onTap: () {
           showModalBottomSheet(
             context: context,
             builder: (context) {
@@ -119,7 +121,12 @@ class _TarefasPageState extends State<TarefasPage> {
             },
           );
         },
-        child: const Icon(Icons.add),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 18),
+          child: Icon(Icons.add, color: Colors.white, size: 30, weight: 700),
+        ),
+          )
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,31 +153,35 @@ class _TarefasPageState extends State<TarefasPage> {
           load
               ? const Center(child: CircularProgressIndicator())
               : Expanded(
-                  child: ListView.builder(
-                    itemCount: _tarefas.tarefas.length,
-                    itemBuilder: (_, int index) {
-                      var tarefa = _tarefas.tarefas[index];
-                      return Dismissible(
-                          onDismissed: (direction) async {
-                            await tarefaRepositorie
-                                .deletarTarefa(tarefa.objectId);
-                            _tarefas.tarefas.removeAt(index);
-                          },
-                          key: Key(tarefa.objectId),
-                          child: ListTile(
-                            title: Text(tarefa.descricao),
-                            trailing: Switch(
-                              value: tarefa.concluido,
-                              onChanged: (bool value) async {
-                                tarefa.concluido = value;
-                                await tarefaRepositorie.atualizarTarefa(tarefa);
-                                obterDados();
-                              },
-                            ),
-                          ));
-                    },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                    child: ListView.builder(
+                      itemCount: _tarefas.tarefas.length,
+                      itemBuilder: (_, int index) {
+                        var tarefa = _tarefas.tarefas[index];
+                        return Dismissible(
+                            onDismissed: (direction) async {
+                              await tarefaRepositorie
+                                  .deletarTarefa(tarefa.objectId);
+                              _tarefas.tarefas.removeAt(index);
+                            },
+                            key: Key(tarefa.objectId),
+                            child: ListTile(
+                              title: Text(tarefa.descricao),
+                              trailing: Switch(
+                                value: tarefa.concluido,
+                                onChanged: (bool value) async {
+                                  tarefa.concluido = value;
+                                  await tarefaRepositorie.atualizarTarefa(tarefa);
+                                  obterDados();
+                                },
+                              ),
+                            ));
+                      },
+                    ),
                   ),
                 ),
+         Container(color: Colors.transparent, padding: const EdgeInsets.symmetric(vertical: 5))
         ],
       ),
     ));
